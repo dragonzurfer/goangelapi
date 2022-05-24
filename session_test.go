@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/dragonzurfer/goangelapi/smartapigo"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestGetClientSessionSuccess(t *testing.T) {
@@ -18,10 +19,14 @@ func TestGetClientSessionSuccess(t *testing.T) {
 }
 
 type mockFailClient struct {
+	mock.Mock
 }
 
 func (m *mockFailClient) GenerateSession() (smartapigo.UserSession, error) {
-	return smartapigo.UserSession{}, errors.New("Test Error")
+	args := m.Called()
+	res := args.Get(0)
+	err := args.Get(1)
+	return res.(smartapigo.UserSession), err.(error)
 }
 
 func (m *mockFailClient) GetUserProfile() (smartapigo.UserProfile, error) {
@@ -44,6 +49,7 @@ func (m *mockFailClient) GetOpenPositions() (smartapigo.Positions, error) {
 func TestGetClientSessionFail(t *testing.T) {
 	testclient := new(mockFailClient)
 	err_message := "Test Error"
+	testclient.On("GenerateSession").Return(smartapigo.UserSession{}, errors.New(err_message))
 	SetExpRetryMaxSleepDuration("10")
 	SetExpRetrySleepDuration("1")
 	_, err := GetClientSession(testclient)
