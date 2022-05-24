@@ -1,0 +1,344 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>goangelapi: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/dragonzurfer/goangelapi/client.go (88.1%)</option>
+				
+				<option value="file1">github.com/dragonzurfer/goangelapi/instrument.go (100.0%)</option>
+				
+				<option value="file2">github.com/dragonzurfer/goangelapi/session.go (90.9%)</option>
+				
+				<option value="file3">github.com/dragonzurfer/goangelapi/utility.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package goangelapi
+
+import (
+        "errors"
+        "os"
+        "strconv"
+
+        "github.com/dragonzurfer/goangelapi/smartapigo"
+)
+
+var (
+        API_KEY   = os.Getenv("AngelAPIKEY")
+        CLIENT_ID = os.Getenv("AngelClientID")
+        PASSWORD  = os.Getenv("Password")
+)
+
+func setAPIkey(apikey string) <span class="cov8" title="1">{
+        API_KEY = apikey
+}</span>
+
+func setClientID(clientid string) <span class="cov8" title="1">{
+        CLIENT_ID = clientid
+}</span>
+
+func setPassword(pass string) <span class="cov8" title="1">{
+        PASSWORD = pass
+}</span>
+
+func SetCredentials(apikey, clientid, pass string) <span class="cov8" title="1">{
+        setAPIkey(apikey)
+        setClientID(clientid)
+        setPassword(pass)
+}</span>
+
+type ClientInterface interface {
+        GenerateSession() (smartapigo.UserSession, error)
+        GetUserProfile() (smartapigo.UserProfile, error)
+}
+
+type Client struct {
+        SmartAPIClient *smartapigo.Client
+}
+
+func (c *Client) GenerateSession() (smartapigo.UserSession, error) <span class="cov8" title="1">{
+        return c.SmartAPIClient.GenerateSession()
+}</span>
+
+func (c *Client) GetUserProfile() (smartapigo.UserProfile, error) <span class="cov8" title="1">{
+        return c.SmartAPIClient.GetUserProfile()
+}</span>
+
+// ** Parms order apikey, clientid, password
+func GetClient(params ...string) *Client <span class="cov8" title="1">{
+        if len(params) &gt; 0 </span><span class="cov8" title="1">{
+                setAPIkey(params[0])
+        }</span>
+        <span class="cov8" title="1">if len(params) &gt; 1 </span><span class="cov8" title="1">{
+                setClientID(params[1])
+        }</span>
+        <span class="cov8" title="1">if len(params) &gt; 2 </span><span class="cov8" title="1">{
+                setPassword(params[2])
+        }</span>
+        <span class="cov8" title="1">smartapiClient := smartapigo.New(CLIENT_ID, PASSWORD, API_KEY)
+        client := &amp;Client{
+                SmartAPIClient: smartapiClient,
+        }
+        // set them back in case len(params) &gt; 0
+        SetCredentials(os.Getenv("AngelAPIKEY"), os.Getenv("AngelClientID"), os.Getenv("Password"))
+
+        return client</span>
+}
+
+func (c *Client) GetPositions() (smartapigo.Positions, error) <span class="cov8" title="1">{
+        positions, err := c.SmartAPIClient.GetPositions()
+        return positions, err
+}</span>
+
+func (c *Client) GetOpenPositions() (smartapigo.Positions, error) <span class="cov8" title="1">{
+        var openPositions smartapigo.Positions
+        positions, err := c.SmartAPIClient.GetPositions()
+        if err != nil </span><span class="cov0" title="0">{
+                return positions, err
+        }</span>
+
+        // open positions have abs(NetQty) &gt; 0
+        <span class="cov8" title="1">for _, p := range positions </span><span class="cov8" title="1">{
+                netQty, err := strconv.ParseFloat(p.NetQty, 64)
+                if err != nil </span><span class="cov0" title="0">{
+                        return openPositions, errors.New("error parsing float64 Angel api position.NetQty which is type string")
+                }</span>
+                <span class="cov8" title="1">if netQty != 0 </span><span class="cov8" title="1">{
+                        openPositions = append(openPositions, p)
+                }</span>
+        }
+        <span class="cov8" title="1">return openPositions, nil</span>
+}
+
+func (c *Client) GetClosedPositions() (smartapigo.Positions, error) <span class="cov8" title="1">{
+        var closedPosition smartapigo.Positions
+        positions, err := c.SmartAPIClient.GetPositions()
+        if err != nil </span><span class="cov0" title="0">{
+                return positions, err
+        }</span>
+
+        // closed positions have abs(NetQty) = 0
+        <span class="cov8" title="1">for _, p := range positions </span><span class="cov8" title="1">{
+                netQty, err := strconv.ParseFloat(p.NetQty, 64)
+                if err != nil </span><span class="cov0" title="0">{
+                        return closedPosition, errors.New("error parsing float64 Angel api position.NetQty which is type string")
+                }</span>
+                <span class="cov8" title="1">if netQty == 0 </span><span class="cov0" title="0">{
+                        closedPosition = append(closedPosition, p)
+                }</span>
+        }
+        <span class="cov8" title="1">return closedPosition, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package goangelapi
+
+import (
+        "encoding/json"
+        "errors"
+        "net/http"
+
+        "github.com/dragonzurfer/goangelapi/fire"
+)
+
+// exact copy of json response
+type Instrument struct {
+        Token          string
+        Symbol         string
+        Name           string
+        Expiry         string
+        Strike         string
+        Lotsize        string
+        InstrumentType string //OPTCUR,UNDIRT,OPTFUT,FUTCOM,,FUTSTK,FUTIDX,OPTIRC,FUTIRC,AUCSO,OPTSTK,FUTCUR,INDEX,UNDIRD,OPTIDX,UNDCUR,UNDIRC,FUTIRT,COMDTY
+        Exch_Seg       string //NSE,BSE,NFO,CDS,MCX,NCDEX
+        Tick_Size      string
+}
+
+func GetInstrumentsJSON() ([]Instrument, error) <span class="cov8" title="1">{
+        var instruments []Instrument
+        body, status := fire.GetInstruments()
+        if status != http.StatusOK </span><span class="cov8" title="1">{
+                return instruments, errors.New("Get instruments request return status " + http.StatusText(status))
+        }</span>
+        <span class="cov8" title="1">json.Unmarshal(body, &amp;instruments)
+        return instruments, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package goangelapi
+
+import (
+        "errors"
+
+        "github.com/dragonzurfer/goangelapi/smartapigo"
+)
+
+func GetClientSession(client ClientInterface) (smartapigo.UserSession, error) <span class="cov8" title="1">{
+        var session smartapigo.UserSession
+
+        // retry exponentially since without session we can't do anything
+        sessionInterface, err := ExponentialRetry(func() (interface{}, error) </span><span class="cov8" title="1">{
+                session, err := client.GenerateSession()
+                return session, err
+        }</span>)
+        // check if hit max retries
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                return session, err
+        }</span>
+
+        // cast interface to type
+        <span class="cov8" title="1">session = sessionInterface.(smartapigo.UserSession)
+        session.UserProfile, err = client.GetUserProfile()
+        if err != nil </span><span class="cov0" title="0">{
+                return session, errors.New("unable to get user profile:" + err.Error())
+        }</span>
+
+        <span class="cov8" title="1">return session, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package goangelapi
+
+import (
+        "fmt"
+        "os"
+        "reflect"
+        "runtime"
+        "strconv"
+        "time"
+)
+
+var (
+        //really need to fix the environment name
+        FUNCTION_RETRY_SLEEP_DURATION     = os.Getenv("goangelapi_function_retry_sleepduration")
+        FUNCTION_RETRY_MAX_SLEEP_DURATION = os.Getenv("goangelapi_function_max_sleepduration")
+)
+
+func SetExpRetrySleepDuration(val string) <span class="cov8" title="1">{
+        FUNCTION_RETRY_SLEEP_DURATION = val
+}</span>
+
+func SetExpRetryMaxSleepDuration(val string) <span class="cov8" title="1">{
+        FUNCTION_RETRY_MAX_SLEEP_DURATION = val
+}</span>
+
+func ExponentialRetry(f func() (interface{}, error)) (interface{}, error) <span class="cov8" title="1">{
+        sleepTime, err := strconv.Atoi(FUNCTION_RETRY_SLEEP_DURATION)
+        if err != nil </span><span class="cov8" title="1">{
+                panic("env variable FUNCTION_RETRY_SLEEP_DURATION is invalid: got " + FUNCTION_RETRY_SLEEP_DURATION)</span>
+        }
+
+        <span class="cov8" title="1">maxSleepDuration, err := strconv.Atoi(FUNCTION_RETRY_MAX_SLEEP_DURATION)
+        if err != nil </span><span class="cov8" title="1">{
+                panic("env variable FUNCTION_RETRY_MAX_SLEEP_DURATION is invalid: got " + FUNCTION_RETRY_MAX_SLEEP_DURATION)</span>
+        }
+
+        <span class="cov8" title="1">for </span><span class="cov8" title="1">{
+                ret, err := f()
+                if err == nil </span><span class="cov8" title="1">{
+                        return ret, err
+                }</span>
+
+                <span class="cov8" title="1">if sleepTime &gt; maxSleepDuration </span><span class="cov8" title="1">{
+                        return ret, err
+                }</span>
+
+                <span class="cov8" title="1">time.Sleep(time.Second * time.Duration(sleepTime))
+                fmt.Println("retrying ", runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name())
+                sleepTime = sleepTime * 2</span>
+        }
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
