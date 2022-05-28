@@ -2,7 +2,6 @@ package goangelapi
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"runtime"
 	"strconv"
@@ -11,8 +10,8 @@ import (
 
 var (
 	//really need to fix the environment name
-	FUNCTION_RETRY_SLEEP_DURATION     = os.Getenv("goangelapi_function_retry_sleepduration")
-	FUNCTION_RETRY_MAX_SLEEP_DURATION = os.Getenv("goangelapi_function_max_sleepduration")
+	FUNCTION_RETRY_SLEEP_DURATION     = "5"
+	FUNCTION_RETRY_MAX_SLEEP_DURATION = "300"
 )
 
 func SetExpRetrySleepDuration(val string) {
