@@ -1,4 +1,4 @@
-package goangelapi
+package goangelapi_test
 
 import (
 	"fmt"
@@ -7,29 +7,30 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/dragonzurfer/goangelapi"
 	"github.com/dragonzurfer/goangelapi/smartapigo"
 )
 
 func TestGetClient(t *testing.T) {
-	client := GetClient(os.Getenv("AngelAPIKEY"), os.Getenv("AngelClientID"), os.Getenv("Password")).SmartAPIClient
+	client := goangelapi.GetClient(os.Getenv("AngelAPIKEY"), os.Getenv("AngelClientID"), os.Getenv("Password")).SmartAPIClient
 	client_ := smartapigo.New(os.Getenv("AngelClientID"), os.Getenv("Password"), os.Getenv("AngelAPIKEY"))
 	if reflect.DeepEqual(client, client_) == false {
 		t.Error("got ", client, " want ", client_)
 	}
 
-	client1 := GetClient("A").SmartAPIClient
+	client1 := goangelapi.GetClient("A").SmartAPIClient
 	client_1 := smartapigo.New(os.Getenv("AngelClientID"), os.Getenv("Password"), "A")
 	if reflect.DeepEqual(client1, client_1) == false {
 		t.Error("got ", client1, " want ", client_1)
 	}
 
-	client2 := GetClient("A", "B").SmartAPIClient
+	client2 := goangelapi.GetClient("A", "B").SmartAPIClient
 	client_2 := smartapigo.New("B", os.Getenv("Password"), "A")
 	if reflect.DeepEqual(client2, client_2) == false {
 		t.Error("got ", client2, " gwantot ", client_2)
 	}
 
-	client3 := GetClient("A", "B", "C").SmartAPIClient
+	client3 := goangelapi.GetClient("A", "B", "C").SmartAPIClient
 	client_3 := smartapigo.New("B", "C", "A")
 	if reflect.DeepEqual(client3, client_3) == false {
 		t.Error("got ", client3, " want ", client_3)
@@ -38,8 +39,8 @@ func TestGetClient(t *testing.T) {
 }
 
 func TestGetPositions(t *testing.T) {
-	client := GetClient()
-	GetClientSession(client)
+	client := goangelapi.GetClient()
+	goangelapi.GetClientSession(client)
 	positions, err := client.GetPositions()
 	if err != nil {
 		t.Error(err.Error())
@@ -59,8 +60,8 @@ func TestGetPositions(t *testing.T) {
 }
 
 func TestGetPositionsOpen(t *testing.T) {
-	client := GetClient()
-	GetClientSession(client)
+	client := goangelapi.GetClient()
+	goangelapi.GetClientSession(client)
 	positions, err := client.GetOpenPositions()
 	if err != nil {
 		t.Error(err.Error())
@@ -79,8 +80,8 @@ func TestGetPositionsOpen(t *testing.T) {
 }
 
 func TestGetPositionsClosed(t *testing.T) {
-	client := GetClient()
-	GetClientSession(client)
+	client := goangelapi.GetClient()
+	goangelapi.GetClientSession(client)
 	positions, err := client.GetClosedPositions()
 	if err != nil {
 		t.Error(err.Error())

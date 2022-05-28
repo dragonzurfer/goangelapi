@@ -1,17 +1,18 @@
-package goangelapi
+package goangelapi_test
 
 import (
 	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/dragonzurfer/goangelapi"
 	"github.com/dragonzurfer/goangelapi/smartapigo"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestGetClientSessionSuccess(t *testing.T) {
-	client := GetClient()
-	session, err := GetClientSession(client)
+	client := goangelapi.GetClient()
+	session, err := goangelapi.GetClientSession(client)
 	if err != nil {
 		t.Fatalf("%s", err.Error())
 	}
@@ -50,9 +51,9 @@ func TestGetClientSessionFail(t *testing.T) {
 	testclient := new(mockFailClient)
 	err_message := "Test Error"
 	testclient.On("GenerateSession").Return(smartapigo.UserSession{}, errors.New(err_message))
-	SetExpRetryMaxSleepDuration("10")
-	SetExpRetrySleepDuration("1")
-	_, err := GetClientSession(testclient)
+	goangelapi.SetExpRetryMaxSleepDuration("10")
+	goangelapi.SetExpRetrySleepDuration("1")
+	_, err := goangelapi.GetClientSession(testclient)
 	if err == nil {
 		t.Fatalf("Session Fail test succeeding not hitting api rate limit")
 	}
@@ -62,91 +63,3 @@ func TestGetClientSessionFail(t *testing.T) {
 	}
 
 }
-
-// func TestWebsocket(t *testing.T) {
-// 	defer func() {
-// 		if r := recover(); r != nil {
-// 			fmt.Println("recovered")
-// 		}
-// 		client := GetClient()
-// 		session, err := GetClientSession(client)
-// 		if err != nil {
-// 			fmt.Println(err.Error())
-// 			return
-// 		}
-// 		positions, _ := client.SmartAPIClient.GetPositions()
-// 		socketClient = websocket.New("S1385792", session.FeedToken, "nse_fo|"+positions[1].SymbolToken)
-
-// 		// Assign callbacks
-// 		socketClient.OnError(onError)
-// 		socketClient.OnClose(onClose)
-// 		socketClient.OnMessage(onMessage)
-// 		socketClient.OnConnect(onConnect)
-// 		socketClient.OnReconnect(onReconnect)
-// 		socketClient.OnNoReconnect(onNoReconnect)
-// 		socketClient.Serve()
-// 	}()
-// 	client := GetClient()
-// 	session, err := GetClientSession(client)
-// 	if err != nil {
-// 		fmt.Println(err.Error())
-// 		return
-// 	}
-
-// 	positions, _ := client.SmartAPIClient.GetPositions()
-// 	fmt.Println(positions[1])
-
-// 	// New Websocket Client
-// 	socketClient = websocket.New("S1385792", session.FeedToken, "nse_fo|42340")
-
-// 	// Assign callbacks
-// 	socketClient.OnError(onError)
-// 	socketClient.OnClose(onClose)
-// 	socketClient.OnMessage(onMessage)
-// 	socketClient.OnConnect(onConnect)
-// 	socketClient.OnReconnect(onReconnect)
-// 	socketClient.OnNoReconnect(onNoReconnect)
-// 	go func() {
-// 		time.Sleep(time.Second * 10)
-// 		fmt.Println("stopping")
-// 		socketClient.Stop()
-// 	}()
-// 	// Start Consuming Data
-// 	socketClient.Serve()
-// }
-
-// var socketClient *websocket.SocketClient
-
-// // Triggered when any error is raised
-// func onError(err error) {
-// 	fmt.Println("Error: ", err)
-// }
-
-// // Triggered when websocket connection is closed
-// func onClose(code int, reason string) {
-// 	fmt.Println("Close: ", code, reason)
-// }
-
-// // Triggered when connection is established and ready to send and accept data
-// func onConnect() {
-// 	fmt.Println("Connected")
-// 	err := socketClient.Subscribe()
-// 	if err != nil {
-// 		fmt.Println("err: ", err)
-// 	}
-// }
-
-// // Triggered when a message is received
-// func onMessage(message []map[string]interface{}) {
-// 	fmt.Printf("Message Received :- %v\n", message)
-// }
-
-// // Triggered when reconnection is attempted which is enabled by default
-// func onReconnect(attempt int, delay time.Duration) {
-// 	fmt.Printf("Reconnect attempt %d in %fs\n", attempt, delay.Seconds())
-// }
-
-// // Triggered when maximum number of reconnect attempt is made and the program is terminated
-// func onNoReconnect(attempt int) {
-// 	fmt.Printf("Maximum no of reconnect attempt reached: %d\n", attempt)
-// }

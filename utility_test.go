@@ -1,15 +1,17 @@
-package goangelapi
+package goangelapi_test
 
 import (
 	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/dragonzurfer/goangelapi"
 )
 
 func TestExponentialRetryFail(t *testing.T) {
-	SetExpRetrySleepDuration("1")
-	SetExpRetryMaxSleepDuration("10")
-	valInterface, err := ExponentialRetry(func() (interface{}, error) {
+	goangelapi.SetExpRetrySleepDuration("1")
+	goangelapi.SetExpRetryMaxSleepDuration("10")
+	valInterface, err := goangelapi.ExponentialRetry(func() (interface{}, error) {
 		return nil, errors.New("This is a test generated error")
 	})
 	if err == nil {
@@ -20,11 +22,13 @@ func TestExponentialRetryFail(t *testing.T) {
 		val := valInterface.(int)
 		t.Errorf("Failure test ended up succesful returned %d", val)
 	}
+	goangelapi.SetExpRetrySleepDuration("5")
+	goangelapi.SetExpRetryMaxSleepDuration("30")
 }
 
 func TestExponentialRetrySucess(t *testing.T) {
 	testInteger := 10
-	valInterface, err := ExponentialRetry(func() (interface{}, error) {
+	valInterface, err := goangelapi.ExponentialRetry(func() (interface{}, error) {
 		return testInteger, nil
 	})
 	if err != nil {
@@ -42,10 +46,12 @@ func TestExponentialRetryPanicSleepDuration(t *testing.T) {
 			fmt.Println("Recovered in Test: ", r)
 		}
 	}()
-	SetExpRetrySleepDuration("A")
-	ExponentialRetry(func() (interface{}, error) {
+	goangelapi.SetExpRetrySleepDuration("A")
+	goangelapi.ExponentialRetry(func() (interface{}, error) {
 		return nil, errors.New("This is a test generated error")
 	})
+	goangelapi.SetExpRetrySleepDuration("5")
+	goangelapi.SetExpRetryMaxSleepDuration("30")
 }
 
 func TestExponentialRetryMaxSleepDuration(t *testing.T) {
@@ -54,9 +60,11 @@ func TestExponentialRetryMaxSleepDuration(t *testing.T) {
 			fmt.Println("Recovered in Test: ", r)
 		}
 	}()
-	SetExpRetrySleepDuration("1")
-	SetExpRetryMaxSleepDuration("A")
-	ExponentialRetry(func() (interface{}, error) {
+	goangelapi.SetExpRetrySleepDuration("1")
+	goangelapi.SetExpRetryMaxSleepDuration("5")
+	goangelapi.ExponentialRetry(func() (interface{}, error) {
 		return nil, errors.New("This is a test generated error")
 	})
+	goangelapi.SetExpRetrySleepDuration("5")
+	goangelapi.SetExpRetryMaxSleepDuration("30")
 }
